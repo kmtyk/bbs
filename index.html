@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <title>簡易掲示板</title>
+    <meta charset="utf-8">
+    <link href="/style.css" rel="stylesheet" type="text/css">
+
+    <script>
+        window.onload = getEntries; // 一覧取得
+        function getEntries() {
+            const url = '/list';
+            const req = new XMLHttpRequest();
+            req.onreadystatechange = function () {
+                if (req.readyState == 4 && req.status == 200) {
+                    const entries = JSON.parse(req.response);
+                    makeTable(entries); // 画面表示関数を実行
+                }
+            }
+            req.open('GET', url, true);
+            req.send(); // 送信
+        }
+
+        function sendEntry() {
+            const name = document.getElementById('name').value;
+            const text = document.getElementById('text').value;
+            const url = '/write';
+            const req = new XMLHttpRequest();
+
+            req.onreadystatechange = function () {
+                if (req.readyState == 4 && req.status == 200) {
+                    const entries = JSON.parse(req.response);
+                    makeTable(entries); // 画面表示関数を実行
+                }
+            }
+
+            req.open('POST', url, true);
+            req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            req.send('entry=' + JSON.stringify({ name: encodeURIComponent(name), text: encodeURIComponent(encodeURIComponent(text)) })); // JSON 送信（JSON.stringify で文字列化して送信）
+        }
+
+        function makeTable(entries) {
+            const entriesDiv = document.getElementById('entries');
+            entriesDiv.innerHTML = '';
+
+            for (let i in entries) {
+                const tr = document.createElement('tr');
+
+
+
+                const divName = document.createElement('div');
+                divName.innerText = entries[i].name;
+                divName.style.backgroundColor = 'lightblue'; // 白背景に
+                divName.style.marginTop = '10px';    // 上にある程度の余白を
+                divName.style.fontSize = '17px';     // 文字を大きく
+                divName.style.fontWeight = 'bold';   // 太字に
+                divName.style.marginLeft = '10px';
+                entriesDiv.appendChild(divName);
+
+                const divDate = document.createElement('div');
+                divDate.innerText = new Date(entries[i].date);
+                divDate.style.backgroundColor = 'lightblue'; // 白背景に
+                divDate.style.fontSize = '15px';     // 文字を小さく
+                divDate.style.marginLeft = '10px';
+                entriesDiv.appendChild(divDate);
+
+                const divText = document.createElement('div');
+                divText.innerText = entries[i].text;
+                divText.style.backgroundColor = 'lightblue'; // 白背景に
+                divText.style.padding = '5px';          // 枠と中身の隙間
+                divText.style.borderRadius = '1px';    // 角丸
+                divText.style.borderWidth = '1px';      // 枠の太さ
+                divText.style.borderColor = '#00f';     // 枠の色
+                divText.style.borderStyle = 'solid';    // 枠のスタイル
+                divText.style.whiteSpace = 'pre';
+                divText.style.marginLeft = '10px';
+                divText.style.fontFamily = 'Courier New';
+                entriesDiv.appendChild(divText);
+
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="content" role="main">
+            <h1 class="title">掲示板</h1>
+            <p>一言掲示板です。書き寄せどうぞ。</p>
+            <p>注意事項:</p>
+            <ul>
+                <li>無法地帯</li>
+                <li>書き込みは自己責任</li>
+                <li>基本的に規制なし</li>
+            </ul>
+            <p>
+                最近の更新:
+            </p>
+            <ul>
+                <li>2023-09-03 サイトを公開しました。</li>
+            </ul>
+            <p><a href="/">リロード(仮)</a></p>
+            <p><a href="#post">書き込む</a></p>
+
+
+            <div id="entries" style="width:800px;"></div>
+
+            <br>
+            <hr />
+            <h2 id="post">投稿</h2>
+            <form>
+                <input type="text" id="name" placeholder="名前" style="width:200px;" /><br />
+                <textarea id="text" placeholder="本文" style="width:400px; height:100px;"></textarea><br />
+                <button onclick="sendEntry()">送信</button>
+            </form>
+</body>
+
+</html>
